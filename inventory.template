@@ -1,0 +1,8 @@
+[web]
+${web_public_ip}    #${web_id}
+
+[grafana]
+${grafana_public_ip} #${grafana_id}
+
+[all_servers]
+ansible_ssh_private_key_file=./private_key.pem

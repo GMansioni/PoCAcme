@@ -1,0 +1,8 @@
+- hosts: web
+  become: yes
+  roles:
+        - webserver
+- hosts: grafana
+  become: yes
+  roles:
+        - grafanaserv 

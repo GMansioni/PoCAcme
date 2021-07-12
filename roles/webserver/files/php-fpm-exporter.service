@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus PHP-FPM Exporter
+After=network.target
+
+[Service]
+ExecStart= /usr/local/bin/php-fpm-exporter --addr ":9253"
+Restart=always
+User=prometheus
+Group=prometheus
+
+[Install]
+WantedBy=multi-user.target

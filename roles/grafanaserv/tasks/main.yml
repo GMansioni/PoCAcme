@@ -1,0 +1,103 @@
+---
+# tasks file for grafanaserv
+
+# Seccion Servidor Grafana
+
+- name: "Instalar clave Grafana"
+  apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+
+- name: "Añadir repositorio grafana"
+  apt_repository:
+    repo: 'deb https://packages.grafana.com/oss/deb stable main'
+    state: present
+    filename: grafana
+    update_cache: yes
+
+- name: "Instalar Grafana"
+  apt:
+    name: grafana
+    state: present
+    update_cache: yes
+
+- name: "Configuracion Grafana"
+  template: src=grafana.conf.j2 dest=/etc/grafana/grafana.ini
+  notify: restart_grafana
+
+# Seccion prometheus
+- name: "Instalar Prometheus"
+  apt:
+    name: prometheus
+    state: present
+    update_cache: yes
+
+- name: "Configuracion Prometheus"
+  template: src=prometheus.conf.j2 dest=/etc/prometheus/prometheus.yml
+
+- name: "Reinicia Prometheus"
+  service: name=prometheus state=restarted
+
+- name: "Reinicia Grafana"
+  service: name=grafana-server state=restarted
+
+- name: Esperando a Grafana 10 segundos
+  pause:
+    seconds: 10
+
+# Seccion Datos Grafana
+# Las contraseñas hay que llevarlas a un vault o algo
+
+- name: "Crea usuario API"
+  community.grafana.grafana_user:
+    url: "{{ grafana_url_var }}"
+    url_username: "{{ gfadmin_user_var }}"
+    url_password: "{{ gfadmin_user_var }}"
+    name: "api"
+    email: "api@acme"
+    login: api
+    password: "{{ gfapi_pass_var }}"
+    is_admin: true
+    state: present
+
+- name: "Crea usuario REST"
+  community.grafana.grafana_user:
+    url: "{{ grafana_url_var }}"
+    url_username: "{{ gfadmin_user_var }}"
+    url_password: "{{ gfadmin_user_var }}"
+    name: "rest"
+    email: "rest@acme"
+    login: rest
+    password: "{{ gfapi_pass_var }}"
+    is_admin: true
+    state: present
+
+- name: "Crear el datasource de Prometheus"
+  community.grafana.grafana_datasource:
+    name: Prometheus
+    url: "{{ grafana_url_var }}"
+    url_username: "{{ gfadmin_user_var }}"
+    url_password: "{{ gfadmin_pass_var }}"
+    ds_type: prometheus
+    ds_url: http://localhost:9090/
+    access: direct
+
+- name: "Importar dashboard nginx"
+  community.grafana.grafana_dashboard:
+    grafana_url: "{{ grafana_url_var }}"
+    grafana_user: "{{ gfadmin_user_var }}"
+    grafana_password: "{{ gfadmin_pass_var }}"
+    org_id: 1
+    state: present
+    path: "https://raw.githubusercontent.com/GMansioni/PoCAcme/main/roles/grafanaserv/files/dashboard_nginx.json"
+  ignore_errors: yes
+
+- name: "Importar dashboard php"
+  community.grafana.grafana_dashboard:
+    grafana_url: "{{ grafana_url_var }}"
+    grafana_user: "{{ gfadmin_user_var }}"
+    grafana_password: "{{ gfadmin_pass_var }}"
+    org_id: 1
+    state: present
+    path: "https://raw.githubusercontent.com/GMansioni/PoCAcme/main/roles/grafanaserv/files/dashboard_php.json"
+  ignore_errors: yes

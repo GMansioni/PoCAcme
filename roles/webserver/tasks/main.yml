@@ -1,0 +1,46 @@
+---
+# tasks file for webserver
+- name: "Instala NGINX PHP NODE-EXPORTER"
+  apt:
+    name: ['nginx','php-fpm','prometheus-nginx-exporter']
+    state: present
+    update_cache: yes
+
+# Lo ideal sería desde un repositorio
+- name: "Copia archivos web desde local"
+  copy:
+    src: "var/www/html/"
+    dest: "/var/www/html/"
+
+# Ojo con la version de php si cambia, revisar valores
+
+- name: "Asegura php-fpm cgi.fix_pathinfo"
+  lineinfile: dest=/etc/php/7.4/fpm/php.ini regexp='^(.*)cgi.fix_pathinfo=' line="cgi.fix_pathinfo=0"
+
+- name: "Activar php-fpm status"
+  lineinfile: dest=/etc/php/7.4/fpm/pool.d/www.conf regexp='^(.*)pm.status_path = /status' line="pm.status_path = /status"
+
+- name: Fichero de configuracion de nginx
+  template: src=nginx.conf dest=/etc/nginx/sites-available/default
+  notify:
+    - restart php-fpm
+    - restart nginx
+    - restart nginx_exporter
+
+# Copiar el exporter de php
+- name: "Copia binario php-fpm-exporter"
+  copy:
+    src: php-fpm-exporter
+    dest: /usr/local/bin/php-fpm-exporter
+    mode: a+x
+
+- name: "Copia el servicio php-fpm-exporter"
+  copy:
+    src: php-fpm-exporter.service
+    dest: /etc/systemd/system/php-fpm-exporter.service
+
+- name: "Enable php-fpm-exporter"
+  command: systemctl enable php-fpm-exporter
+
+- name: "Arranca php-fpm-exporter"
+  command: systemctl start php-fpm-exporter

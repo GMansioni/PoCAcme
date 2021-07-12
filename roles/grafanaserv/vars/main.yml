@@ -1,0 +1,7 @@
+---
+# vars file for grafanaserv
+grafana_url_var: 'http://{{ inventory_hostname }}:3000/'
+gfadmin_user_var: admin
+gfadmin_pass_var: admin
+gfapi_pass_var: acme
+gfrest_pass_var: acme

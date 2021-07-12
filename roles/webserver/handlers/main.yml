@@ -1,0 +1,13 @@
+---
+# handlers file for webserver
+  - name: "Reinicia php-fpm"
+    service: name=php7.4-fpm state=restarted
+    listen: restart php-fpm
+
+  - name: "Reinicia nginx"
+    service: name=nginx state=restarted
+    listen: restart nginx
+
+  - name: "Reinicia nginx-exporter"
+    service: name=prometheus-nginx-exporter state=restarted
+    listen: restart nginx_exporter
