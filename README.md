@@ -57,6 +57,6 @@ Known issues / pending improvements
 * Grafana Dashboards included are for test. I need to work on real ones
 * Grafana Dashboards doesn't show at the welcome screen
 * Comments are in spanish ;-)
-* Retrive dashboards .json from Githubs sometimes fail, retry with "vagrant provision"
+* Retrive dashboards .json from Githubs sometimes fail
 * Adjust security group rules
-* Wait time to run asinsible playbook check EC2 availabity
+* Wait time to run asinsible playbook needs to check EC2 availabity
